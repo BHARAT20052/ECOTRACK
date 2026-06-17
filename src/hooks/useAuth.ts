@@ -63,6 +63,7 @@ export function useAuth() {
     try {
       return await signInWithEmailAndPassword(auth, email, password)
     } catch (error) {
+      // eslint-disable-next-line preserve-caught-error
       throw new Error(getAuthErrorMessage(error))
     }
   }
@@ -87,6 +88,7 @@ export function useAuth() {
     } catch (error) {
       // Re-throw if already a mapped error from the inner catch
       if (error instanceof Error && !('code' in error)) throw error
+      // eslint-disable-next-line preserve-caught-error
       throw new Error(getAuthErrorMessage(error))
     }
   }
@@ -108,6 +110,7 @@ export function useAuth() {
       }
       return cred
     } catch (error) {
+      // eslint-disable-next-line preserve-caught-error
       throw new Error(getAuthErrorMessage(error))
     }
   }

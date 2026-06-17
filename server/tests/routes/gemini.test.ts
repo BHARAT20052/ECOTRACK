@@ -1,3 +1,4 @@
+/// <reference types="jest" />
 jest.mock('firebase-admin/app', () => ({
   getApps: jest.fn(() => [{}]),
   initializeApp: jest.fn(),
@@ -15,7 +16,7 @@ jest.mock('firebase-admin/firestore', () => ({
     collection: jest.fn(() => ({
       doc: jest.fn(() => ({ id: 'test-doc' })),
     })),
-    runTransaction: jest.fn(async (cb: Function) => {
+    runTransaction: jest.fn(async (cb: (transaction: { get: unknown; set: unknown }) => unknown) => {
       const mockGet = jest.fn().mockResolvedValue({ exists: true, data: () => ({ requests: [] }) })
       const mockSet = jest.fn()
       return cb({ get: mockGet, set: mockSet })

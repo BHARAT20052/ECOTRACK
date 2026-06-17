@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useForm, SubmitHandler } from 'react-hook-form'
+import { useForm, SubmitHandler, Resolver } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { toast } from 'react-hot-toast'
@@ -34,11 +34,11 @@ export default function Login() {
   type FormData = { email: string; password: string; displayName?: string }
 
   const { register, handleSubmit, formState: { errors }, reset } = useForm<FormData>({
-    resolver: zodResolver(currentSchema) as any,
+    resolver: zodResolver(currentSchema) as Resolver<FormData>,
     defaultValues: { email: '', password: '', displayName: '' },
   })
 
-  const onSubmit: SubmitHandler<any> = async (data) => {
+  const onSubmit: SubmitHandler<FormData> = async (data) => {
     setIsLoading(true)
     setAuthError(null)
     try {
@@ -46,7 +46,7 @@ export default function Login() {
         await loginWithEmail(data.email, data.password)
         toast.success('Successfully logged in!')
       } else {
-        await registerWithEmail(data.email, data.password, data.displayName)
+        await registerWithEmail(data.email, data.password, data.displayName || '')
         toast.success('Account created successfully!')
       }
       navigate('/dashboard')

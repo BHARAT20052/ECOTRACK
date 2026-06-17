@@ -1,4 +1,4 @@
-import { Router } from 'express'
+import { Router, type RequestHandler } from 'express'
 import { GoogleGenerativeAI } from '@google/generative-ai'
 import { z } from 'zod'
 import { requireAuth } from '../middleware/auth'
@@ -32,7 +32,7 @@ const ChatSchema = z.object({
   footprintContext: z.string().max(1000),
 })
 
-geminiRouter.post('/chat', requireAuth as any, geminiRateLimit as any, async (req: AuthRequest, res) => {
+geminiRouter.post('/chat', requireAuth as RequestHandler, geminiRateLimit as RequestHandler, async (req: AuthRequest, res) => {
   const parsed = ChatSchema.safeParse(req.body)
   if (!parsed.success) {
     res.status(400).json({ error: 'Invalid request', details: parsed.error.issues })
@@ -88,7 +88,7 @@ const TipsSchema = z.object({
   footprintContext: z.string().max(1000),
 })
 
-geminiRouter.post('/tips', requireAuth as any, geminiRateLimit as any, async (req: AuthRequest, res) => {
+geminiRouter.post('/tips', requireAuth as RequestHandler, geminiRateLimit as RequestHandler, async (req: AuthRequest, res) => {
   const parsed = TipsSchema.safeParse(req.body)
   if (!parsed.success) {
     res.status(400).json({ error: 'Invalid request' })

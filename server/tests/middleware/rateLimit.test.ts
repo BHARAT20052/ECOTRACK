@@ -1,9 +1,10 @@
+/// <reference types="jest" />
 import type { Response, NextFunction } from 'express'
 import type { AuthRequest } from '../../src/middleware/auth'
 
 const mockGet = jest.fn()
 const mockSet = jest.fn()
-const mockRunTransaction = jest.fn((cb: Function) => cb({ get: mockGet, set: mockSet }))
+const mockRunTransaction = jest.fn((cb: (transaction: { get: typeof mockGet; set: typeof mockSet }) => unknown) => cb({ get: mockGet, set: mockSet }))
 
 jest.mock('firebase-admin/app', () => ({
   getApps: jest.fn(() => [{}]),
@@ -59,7 +60,7 @@ describe('geminiRateLimit middleware', () => {
     const now = Date.now()
     const requests = Array(10).fill(now)
     mockGet.mockResolvedValue({ exists: true, data: () => ({ requests }) })
-    mockRunTransaction.mockImplementation(async (cb: Function) => {
+    mockRunTransaction.mockImplementation(async (cb: (transaction: { get: typeof mockGet; set: typeof mockSet }) => unknown) => {
       const result = cb({ get: mockGet, set: mockSet })
       return result
     })

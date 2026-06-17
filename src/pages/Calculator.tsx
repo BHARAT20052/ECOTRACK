@@ -11,7 +11,7 @@ import { Input } from '@/components/ui/Input'
 import { Card } from '@/components/ui/Card'
 import { calculateCo2 } from '@/utils/emissionCalculator'
 import { EMISSION_FACTORS } from '@/constants/emissionFactors'
-import type { TransportType, FoodType, EnergyType, ShoppingType } from '@/types'
+import type { TransportType, FoodType, EnergyType, ShoppingType, ActivityCategory, ActionDetails, Activity } from '@/types'
 
 const baseSchema = z.object({ value: z.number().positive('Must be greater than 0') })
 
@@ -27,6 +27,7 @@ const TABS = [
  * Carbon footprint calculator with category tabs.
  */
 export default function Calculator() {
+  "use no memo";
   const [activeTab, setActiveTab] = useState<typeof TABS[number]['id']>('transport')
   const { user } = useAuth()
   const { logActivity } = useFootprint(user?.uid || null)
@@ -38,6 +39,7 @@ export default function Calculator() {
     defaultValues: { value: 0, type: '' }
   })
 
+  // eslint-disable-next-line react-hooks/incompatible-library
   const formValues = watch()
   const previewCo2 = React.useMemo(() => {
     if (!formValues.type || !formValues.value) return 0
@@ -51,29 +53,36 @@ export default function Calculator() {
     return co2
   }, [activeTab, formValues])
 
-  const onSubmit = async (data: any) => {
+  const onSubmit = async (data: { value: number; type: string }) => {
     if (!user) return toast.error('Must be logged in')
     try {
-      let details: any = {}
-      if (activeTab === 'transport') details = { distance: data.value, vehicleType: data.type }
-      if (activeTab === 'food') details = { weight: data.value, foodType: data.type }
-      if (activeTab === 'energy') details = { value: data.value, energyType: data.type }
-      if (activeTab === 'shopping') details = { quantity: data.value, itemType: data.type }
+      let details: Activity['details']
+      if (activeTab === 'transport') {
+        details = { distance: data.value, vehicleType: data.type as TransportType }
+      } else if (activeTab === 'food') {
+        details = { weight: data.value, foodType: data.type as FoodType }
+      } else if (activeTab === 'energy') {
+        details = { value: data.value, energyType: data.type as EnergyType }
+      } else if (activeTab === 'shopping') {
+        details = { quantity: data.value, itemType: data.type as ShoppingType }
+      } else {
+        return
+      }
       
-      await logActivity(activeTab as any, details)
+      await logActivity(activeTab as ActivityCategory, details)
       toast.success(`Activity logged!`)
       reset()
-    } catch (e) {
+    } catch {
       toast.error('Failed to log activity')
     }
   }
 
-  const handleEcoAction = async (actionId: any, name: string) => {
+  const handleEcoAction = async (actionId: ActionDetails['actionId'], name: string) => {
     if (!user) return toast.error('Must be logged in')
     try {
       await logActivity('action', { actionId, actionName: name })
       toast.success(`Awesome! Recorded: ${name}`)
-    } catch (e) {
+    } catch {
       toast.error('Failed to log eco action')
     }
   }

@@ -21,6 +21,7 @@ export function useGoals(uid: string | null) {
 
   useEffect(() => {
     if (uid) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       fetchGoal()
     } else {
       setGoal(null)

@@ -20,6 +20,7 @@ export default function Profile() {
     if (user) {
       getUserProfile(user.uid).then(setProfile)
     } else {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setProfile(null)
     }
   }, [user])

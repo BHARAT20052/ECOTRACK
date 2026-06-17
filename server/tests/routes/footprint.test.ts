@@ -1,3 +1,4 @@
+/// <reference types="jest" />
 jest.mock('firebase-admin/app', () => ({
   getApps: jest.fn(() => [{}]),
   initializeApp: jest.fn(),

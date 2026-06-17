@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/Input'
 import { Badge } from '@/components/ui/Badge'
 import { BADGES } from '@/constants/emissionFactors'
 import { getUserProfile } from '@/services/firestore'
+import type { UserProfile, ActionDetails } from '@/types'
 
 /**
  * Goals and Badges page.
@@ -22,11 +23,11 @@ export default function Goals() {
   const [goalInput, setGoalInput] = useState('')
   const [earnedBadges, setEarnedBadges] = useState<string[]>([])
   const [badgesLoading, setBadgesLoading] = useState(true)
-  const [profile, setProfile] = useState<any>(null)
+  const [profile, setProfile] = useState<UserProfile | null>(null)
 
   useEffect(() => {
     if (user) {
-      getUserProfile(user.uid).then((p: any) => {
+      getUserProfile(user.uid).then((p: UserProfile | null) => {
         setProfile(p)
         setEarnedBadges(p?.badges || [])
         setBadgesLoading(false)
@@ -48,7 +49,7 @@ export default function Goals() {
     }
   }
 
-  const handleEcoAction = async (actionId: any, name: string) => {
+  const handleEcoAction = async (actionId: ActionDetails['actionId'], name: string) => {
     if (!user) return
     try {
       await logActivity('action', { actionId, actionName: name })
@@ -186,12 +187,12 @@ export default function Goals() {
           {badgesLoading ? (
             Array(5).fill(0).map((_, i) => <div key={i} className="h-32 skeleton"></div>)
           ) : (
-            Object.values(BADGES).map((badge: any) => {
+            Object.values(BADGES).map((badge) => {
               const isEarned = earnedBadges.includes(badge.id)
               return (
                 <Card key={badge.id} className={`p-4 text-center transition-all ${isEarned ? 'border-amber-200 bg-amber-50/30' : 'opacity-60 grayscale'}`}>
                   <div className="text-4xl mb-2">{badge.icon}</div>
-                  <h3 className={`font-semibold text-sm ${isEarned ? 'text-gray-900' : 'text-gray-500'}`}>{badge.name}</h3>
+                  <h3 className={`font-semibold text-sm ${isEarned ? 'text-gray-900' : 'text-gray-500'}`}>{badge.label}</h3>
                   <p className="text-xs text-gray-500 mt-1">{badge.description}</p>
                 </Card>
               )

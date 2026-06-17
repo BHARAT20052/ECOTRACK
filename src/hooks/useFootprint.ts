@@ -24,6 +24,7 @@ export function useFootprint(uid: string | null) {
 
   useEffect(() => {
     if (uid) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       fetchActivities()
     } else {
       setActivities([])

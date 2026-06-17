@@ -5,6 +5,7 @@ import { useFootprint } from '@/hooks/useFootprint'
 import { useGemini } from '@/hooks/useGemini'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
+import type { ChatMessage } from '@/types'
 
 /**
  * AI Assistant chat interface using Gemini.
@@ -74,7 +75,7 @@ export default function Assistant() {
             </div>
           )}
 
-          {messages.map((msg: any, idx: number) => (
+          {messages.map((msg: ChatMessage, idx: number) => (
             <div key={idx} className={`flex items-start gap-4 ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}>
               <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${
                 msg.role === 'user' ? 'bg-primary-600 text-white' : 'bg-primary-100 text-primary-600'

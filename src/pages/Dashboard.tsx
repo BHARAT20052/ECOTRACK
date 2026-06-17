@@ -22,6 +22,7 @@ export default function Dashboard() {
     if (user) {
       getUserProfile(user.uid).then(setProfile)
     } else {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setProfile(null)
     }
   }, [user])
@@ -29,7 +30,7 @@ export default function Dashboard() {
   const categoryData = useMemo(() => {
     if (!summary) return []
     return Object.entries(summary.byCategory)
-      .filter(([_, value]) => value > 0)
+      .filter(([, value]) => value > 0)
       .map(([name, value]) => ({
         name: name.charAt(0).toUpperCase() + name.slice(1),
         value,
@@ -129,7 +130,7 @@ export default function Dashboard() {
           <table className="sr-only">
             <caption>Weekly CO2 Trend</caption>
             <tbody>
-              {summary.weeklyTrend.map((d: any) => (
+              {summary.weeklyTrend.map((d: { date: string; co2: number }) => (
                 <tr key={d.date}><td>{d.date}</td><td>{d.co2} kg</td></tr>
               ))}
             </tbody>
@@ -155,7 +156,7 @@ export default function Dashboard() {
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                     ))}
                   </Pie>
-                  <Tooltip formatter={(value: any) => `${formatCo2(value)}`} />
+                  <Tooltip formatter={(value: unknown) => `${formatCo2(value as number)}`} />
                   <Legend />
                 </PieChart>
               </ResponsiveContainer>

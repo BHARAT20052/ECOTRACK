@@ -1,3 +1,4 @@
+/// <reference types="jest" />
 import type { Response, NextFunction } from 'express'
 import type { AuthRequest } from '../../src/middleware/auth'
 
