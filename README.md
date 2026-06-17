@@ -20,27 +20,27 @@ A full-stack web application designed to help individuals understand, track, and
 ## Setup Instructions
 
 1. **Clone the repository**
-   \`\`\`bash
+   ```bash
    git clone <repository-url>
    cd carbon-footprint-platform
-   \`\`\`
+   ```
 
 2. **Frontend Setup**
-   \`\`\`bash
+   ```bash
    npm install
    cp .env.example .env.local
    # Fill in your Firebase config in .env.local
    npm run dev
-   \`\`\`
+   ```
 
 3. **Backend Setup**
-   \`\`\`bash
+   ```bash
    cd server
    npm install
    cp .env.example .env
    # Fill in your Gemini API key and Firebase Admin credentials in .env
    npm run dev
-   \`\`\`
+   ```
 
 ## Testing
 - **Frontend**: `npm run test` or `npm run test:coverage`
