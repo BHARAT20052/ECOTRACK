@@ -1,0 +1,11 @@
+node_modules/
+dist/
+.env
+.env.local
+server/.env
+*.log
+.firebase/
+coverage/
+.DS_Store
+key.json
+server/key.json
