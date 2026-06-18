@@ -13,11 +13,19 @@ Be encouraging, concise, and personalized. Use bullet points for lists.
 Always reference the user's actual numbers when giving advice.
 Context about the user's carbon footprint will be prefixed with "[USER DATA]:".`
 
+interface GroqChatResponse {
+  choices: {
+    message: {
+      content: string
+    }
+  }[]
+}
+
 const ChatSchema = z.object({
   messages: z.array(z.object({
     role: z.enum(['user', 'assistant']),
     content: z.string().max(2000),
-    timestamp: z.any(),
+    timestamp: z.unknown(),
   })).max(50),
   footprintContext: z.string().max(1000),
 })
@@ -79,7 +87,7 @@ async function callGroqChat(
     throw new Error(`Groq API error (${response.status}): ${errText}`)
   }
 
-  const data = await response.json() as any
+  const data = (await response.json()) as GroqChatResponse
   const content = data.choices?.[0]?.message?.content
   if (!content) {
     throw new Error('Groq returned an empty response')
@@ -118,13 +126,23 @@ async function callGroqTips(footprintContext: string): Promise<string[]> {
     throw new Error(`Groq API error (${response.status}): ${errText}`)
   }
 
-  const data = await response.json() as any
+  const data = (await response.json()) as GroqChatResponse
   const content = data.choices?.[0]?.message?.content
   if (!content) {
     throw new Error('Groq returned an empty response')
   }
 
-  return JSON.parse(content.trim()) as string[]
+  const parsed = JSON.parse(content.trim())
+  if (Array.isArray(parsed)) {
+    return parsed as string[]
+  }
+  if (parsed && typeof parsed === 'object') {
+    const arrayKey = Object.keys(parsed).find(k => Array.isArray((parsed as Record<string, unknown>)[k]))
+    if (arrayKey) {
+      return (parsed as Record<string, unknown>)[arrayKey] as string[]
+    }
+  }
+  throw new Error('Parsed content does not contain an array of tips')
 }
 
 geminiRouter.post('/chat', requireAuth as RequestHandler, geminiRateLimit as RequestHandler, async (req: AuthRequest, res) => {
