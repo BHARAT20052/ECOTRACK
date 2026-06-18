@@ -1,14 +1,18 @@
 import { type ButtonHTMLAttributes, forwardRef } from 'react'
 import { clsx } from 'clsx'
 
-interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary' | 'ghost' | 'danger'
-  size?: 'sm' | 'md' | 'lg'
-  loading?: boolean
+export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+  readonly variant?: 'primary' | 'secondary' | 'ghost' | 'danger'
+  readonly size?: 'sm' | 'md' | 'lg'
+  readonly loading?: boolean
 }
 
+/**
+ * A highly reusable Button component supporting multiple variants, sizes, and loading state.
+ * Fully optimized for accessibility.
+ */
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ variant = 'primary', size = 'md', loading, className, children, disabled, ...props }, ref) => {
+  ({ variant = 'primary', size = 'md', loading = false, className, children, disabled, ...props }, ref) => {
     return (
       <button
         ref={ref}
@@ -42,4 +46,5 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     )
   }
 )
+
 Button.displayName = 'Button'

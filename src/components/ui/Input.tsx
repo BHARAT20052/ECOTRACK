@@ -1,12 +1,15 @@
 import { type InputHTMLAttributes, forwardRef, useId } from 'react'
 import { clsx } from 'clsx'
 
-interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
-  label: string
-  error?: string
-  hint?: string
+export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
+  readonly label: string
+  readonly error?: string
+  readonly hint?: string
 }
 
+/**
+ * A standard, fully accessible Input component with support for labels, validation errors, and hints.
+ */
 export const Input = forwardRef<HTMLInputElement, InputProps>(
   ({ label, error, hint, className, id: providedId, ...props }, ref) => {
     const generatedId = useId()
@@ -44,4 +47,5 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
     )
   }
 )
+
 Input.displayName = 'Input'

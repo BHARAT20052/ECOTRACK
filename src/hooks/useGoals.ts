@@ -1,12 +1,29 @@
 import { useState, useEffect, useCallback } from 'react'
-import { getCurrentGoal, setMonthlyGoal } from '@/services/firestore'
+
 import type { Goal } from '@/types'
+import { getCurrentGoal, setMonthlyGoal } from '@/services/firestore'
 
-export function useGoals(uid: string | null) {
+const PROGRESS_MAX = 100 as const
+const PROGRESS_MIN = 0 as const
+
+interface UseGoalsResult {
+  readonly goal: Goal | null
+  readonly loading: boolean
+  readonly updateGoal: (targetCo2: number) => Promise<void>
+  readonly getProgress: (currentCo2: number) => number
+}
+
+/**
+ * Custom hook to manage monthly carbon footprint reduction goals and progress tracking.
+ * 
+ * @param uid - The unique identifier of the authenticated user
+ * @returns State and functions to get/update goals and calculate progress percentages
+ */
+export function useGoals(uid: string | null): UseGoalsResult {
   const [goal, setGoal] = useState<Goal | null>(null)
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState<boolean>(false)
 
-  const fetchGoal = useCallback(async () => {
+  const fetchGoal = useCallback(async (): Promise<void> => {
     if (!uid) return
     setLoading(true)
     try {
@@ -21,28 +38,23 @@ export function useGoals(uid: string | null) {
 
   useEffect(() => {
     if (uid) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      fetchGoal()
+      void fetchGoal()
     } else {
       setGoal(null)
     }
   }, [uid, fetchGoal])
 
-  const updateGoal = useCallback(async (targetCo2: number) => {
+  const updateGoal = useCallback(async (targetCo2: number): Promise<void> => {
     if (!uid) return
     await setMonthlyGoal(uid, targetCo2)
     await fetchGoal()
   }, [uid, fetchGoal])
 
   const getProgress = useCallback((currentCo2: number): number => {
-    if (!goal || goal.targetCo2 <= 0) return 0
-    // If current emissions is lower than the target, return completion progress
-    // Target CO2 represents monthly reduction target (e.g. want to reduce by 100kg)
-    // Actually, progress could be: how much CO2 reduced / target reduction.
-    // Or target limit: e.g. keep emissions below target limit.
-    // Wait, the formula in the prompt: Math.min(100, Math.round(((goal.targetCo2 - currentCo2) / goal.targetCo2) * 100))
-    // Let's use the exact formula from the prompt.
-    return Math.max(0, Math.min(100, Math.round(((goal.targetCo2 - currentCo2) / goal.targetCo2) * 100)))
+    if (!goal || goal.targetCo2 <= 0) return PROGRESS_MIN
+    // Calculate progress as: (targetLimit - currentEmissions) / targetLimit
+    const ratio = (goal.targetCo2 - currentCo2) / goal.targetCo2
+    return Math.max(PROGRESS_MIN, Math.min(PROGRESS_MAX, Math.round(ratio * PROGRESS_MAX)))
   }, [goal])
 
   return { goal, loading, updateGoal, getProgress }

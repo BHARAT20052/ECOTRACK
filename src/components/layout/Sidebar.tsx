@@ -1,16 +1,26 @@
+import React from 'react'
 import { NavLink } from 'react-router-dom'
-import { LayoutDashboard, Calculator, MessageCircle, Target, User, Leaf } from 'lucide-react'
+import { LayoutDashboard, Calculator, MessageCircle, Target, User, Leaf, type LucideIcon } from 'lucide-react'
 import { clsx } from 'clsx'
 
-const NAV_ITEMS = [
+interface NavItem {
+  readonly to: string
+  readonly label: string
+  readonly icon: LucideIcon
+}
+
+const NAV_ITEMS: readonly NavItem[] = [
   { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { to: '/calculator', label: 'Calculator', icon: Calculator },
   { to: '/assistant', label: 'EcoBot', icon: MessageCircle },
   { to: '/goals', label: 'Goals', icon: Target },
   { to: '/profile', label: 'Profile', icon: User },
-]
+] as const
 
-export function Sidebar() {
+/**
+ * Sidebar component that displays the main navigation menu for authenticated users.
+ */
+export const Sidebar: React.FC = () => {
   return (
     <nav
       aria-label="Main navigation"

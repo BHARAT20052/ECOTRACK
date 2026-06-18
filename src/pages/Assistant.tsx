@@ -1,23 +1,26 @@
-import { useState, useRef, useEffect } from 'react'
+import React, { useState, useRef, useEffect, type FormEvent } from 'react'
 import { Send, Bot, User as UserIcon, Trash2 } from 'lucide-react'
+
 import { useAuth } from '@/hooks/useAuth'
 import { useFootprint } from '@/hooks/useFootprint'
 import { useGemini } from '@/hooks/useGemini'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
+import { ErrorBoundary } from '@/components/ui/ErrorBoundary'
 import type { ChatMessage } from '@/types'
 
 /**
- * AI Assistant chat interface using Gemini.
+ * AI Assistant chat page.
+ * Uses Gemini or Groq to provide personalized carbon reduction advice.
  */
-export default function Assistant() {
+function AssistantContent(): React.JSX.Element {
   const { user } = useAuth()
   const { summary } = useFootprint(user?.uid || null)
   const { messages, loading, error, sendMessage, clearMessages } = useGemini(user)
-  const [input, setInput] = useState('')
+  const [input, setInput] = useState<string>('')
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
-  const scrollToBottom = () => {
+  const scrollToBottom = (): void => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }
 
@@ -25,7 +28,7 @@ export default function Assistant() {
     scrollToBottom()
   }, [messages])
 
-  const handleSend = async (e: React.FormEvent) => {
+  const handleSend = async (e: FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault()
     if (!input.trim()) return
 
@@ -139,5 +142,16 @@ export default function Assistant() {
         </div>
       </Card>
     </div>
+  )
+}
+
+/**
+ * Default exported Assistant component wrapped with an ErrorBoundary.
+ */
+export default function Assistant(): React.JSX.Element {
+  return (
+    <ErrorBoundary>
+      <AssistantContent />
+    </ErrorBoundary>
   )
 }

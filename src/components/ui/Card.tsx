@@ -1,11 +1,16 @@
-import { type HTMLAttributes } from 'react'
+import React, { type HTMLAttributes, type ReactNode } from 'react'
 import { clsx } from 'clsx'
 
-interface CardProps extends HTMLAttributes<HTMLDivElement> {
-  glass?: boolean
+export interface CardProps extends HTMLAttributes<HTMLDivElement> {
+  readonly glass?: boolean
+  readonly children?: ReactNode
 }
 
-export function Card({ glass, className, children, ...props }: CardProps) {
+/**
+ * A standard, configurable Card container component.
+ * Supports a glassmorphism theme and custom styling.
+ */
+export const Card: React.FC<CardProps> = ({ glass = false, className, children, ...props }) => {
   return (
     <div
       className={clsx(

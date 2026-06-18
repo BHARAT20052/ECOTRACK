@@ -1,10 +1,19 @@
 import type { ChatMessage } from '@/types'
 
-const BACKEND_URL = import.meta.env.DEV ? '' : (import.meta.env.VITE_BACKEND_URL ?? '')
+const BACKEND_URL = (
+  import.meta.env.DEV ? '' : (import.meta.env.VITE_BACKEND_URL ?? '')
+) as string
 
-/** Send chat message to EcoBot via backend proxy */
+/**
+ * Sends conversation message list and footprint context to the EcoBot backend proxy.
+ * 
+ * @param messages - Array of prior and current messages in the chat history
+ * @param footprintContext - String representation of the user's monthly emissions breakdown
+ * @param authToken - Firebase Auth ID token for verification
+ * @returns A Promise resolving to the assistant's reply string
+ */
 export async function sendChatMessage(
-  messages: ChatMessage[],
+  messages: readonly ChatMessage[],
   footprintContext: string,
   authToken: string
 ): Promise<string> {
@@ -20,8 +29,8 @@ export async function sendChatMessage(
   if (!response.ok) {
     let errMsg = 'Failed to get response'
     try {
-      const err = await response.json()
-      errMsg = (err as { error?: string }).error ?? errMsg
+      const err = (await response.json()) as { error?: string }
+      errMsg = err.error ?? errMsg
     } catch {
       errMsg = `Server error ${response.status}: ${response.statusText || 'Server is offline or unreachable'}`
     }
@@ -32,7 +41,13 @@ export async function sendChatMessage(
   return data.response
 }
 
-/** Get weekly tips from EcoBot */
+/**
+ * Requests weekly carbon footprint reduction tips from the EcoBot backend.
+ * 
+ * @param footprintContext - String representation of the user's monthly emissions breakdown
+ * @param authToken - Firebase Auth ID token for verification
+ * @returns A Promise resolving to an array of tip strings
+ */
 export async function getWeeklyTips(
   footprintContext: string,
   authToken: string
@@ -46,7 +61,9 @@ export async function getWeeklyTips(
     body: JSON.stringify({ footprintContext }),
   })
 
-  if (!response.ok) throw new Error('Failed to fetch tips')
+  if (!response.ok) {
+    throw new Error('Failed to fetch tips')
+  }
   const data = (await response.json()) as { tips: string[] }
   return data.tips
 }

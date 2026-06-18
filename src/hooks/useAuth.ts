@@ -1,14 +1,25 @@
 import { useState, useEffect } from 'react'
 import {
-  signInWithEmailAndPassword, createUserWithEmailAndPassword,
-  signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  signInWithPopup,
+  GoogleAuthProvider,
+  signOut,
+  onAuthStateChanged,
   updateProfile,
-  type User
+  type User,
+  type UserCredential,
 } from 'firebase/auth'
+
 import { auth } from '@/services/firebase'
 import { createUserProfile } from '@/services/firestore'
 
-/** Map Firebase error codes to user-friendly messages */
+/**
+ * Maps Firebase authentication error codes to human-readable error messages.
+ * 
+ * @param error - The caught auth error
+ * @returns User-friendly error message string
+ */
 function getAuthErrorMessage(error: unknown): string {
   if (error && typeof error === 'object' && 'code' in error) {
     const code = (error as { code: string }).code
@@ -47,9 +58,23 @@ function getAuthErrorMessage(error: unknown): string {
   return 'Authentication failed. Please try again.'
 }
 
-export function useAuth() {
+interface UseAuthResult {
+  readonly user: User | null
+  readonly loading: boolean
+  readonly loginWithEmail: (email: string, password: string) => Promise<UserCredential>
+  readonly registerWithEmail: (email: string, password: string, displayName: string) => Promise<UserCredential>
+  readonly loginWithGoogle: () => Promise<UserCredential>
+  readonly logout: () => Promise<void>
+}
+
+/**
+ * Custom hook to handle Firebase authentication states and methods.
+ * 
+ * @returns Methods for logging in, registering, logging out, and current user state
+ */
+export function useAuth(): UseAuthResult {
   const [user, setUser] = useState<User | null>(null)
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState<boolean>(true)
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (u) => {
@@ -59,16 +84,15 @@ export function useAuth() {
     return unsubscribe
   }, [])
 
-  const loginWithEmail = async (email: string, password: string) => {
+  const loginWithEmail = async (email: string, password: string): Promise<UserCredential> => {
     try {
       return await signInWithEmailAndPassword(auth, email, password)
     } catch (error) {
-      // eslint-disable-next-line preserve-caught-error
       throw new Error(getAuthErrorMessage(error))
     }
   }
 
-  const registerWithEmail = async (email: string, password: string, displayName: string) => {
+  const registerWithEmail = async (email: string, password: string, displayName: string): Promise<UserCredential> => {
     try {
       const cred = await createUserWithEmailAndPassword(auth, email, password)
       // Update the Firebase Auth profile with displayName
@@ -86,14 +110,12 @@ export function useAuth() {
       }
       return cred
     } catch (error) {
-      // Re-throw if already a mapped error from the inner catch
       if (error instanceof Error && !('code' in error)) throw error
-      // eslint-disable-next-line preserve-caught-error
       throw new Error(getAuthErrorMessage(error))
     }
   }
 
-  const loginWithGoogle = async () => {
+  const loginWithGoogle = async (): Promise<UserCredential> => {
     try {
       const provider = new GoogleAuthProvider()
       const cred = await signInWithPopup(auth, provider)
@@ -110,12 +132,13 @@ export function useAuth() {
       }
       return cred
     } catch (error) {
-      // eslint-disable-next-line preserve-caught-error
       throw new Error(getAuthErrorMessage(error))
     }
   }
 
-  const logout = () => signOut(auth)
+  const logout = async (): Promise<void> => {
+    await signOut(auth)
+  }
 
   return { user, loading, loginWithEmail, registerWithEmail, loginWithGoogle, logout }
 }
