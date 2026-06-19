@@ -1,14 +1,13 @@
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useCallback } from 'react'
 import { LogOut, User, Mail, Calendar, Activity } from 'lucide-react'
 
 import { useAuth } from '@/hooks/useAuth'
 import { useFootprint } from '@/hooks/useFootprint'
+import { useProfile } from '@/hooks/useProfile'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 import { ErrorBoundary } from '@/components/ui/ErrorBoundary'
 import { formatCo2 } from '@/utils/carbonConverter'
-import { getUserProfile } from '@/services/firestore'
-import type { UserProfile } from '@/types'
 
 /**
  * Renders the user account profile, including membership duration, streak records, and total tracked footprint.
@@ -16,19 +15,7 @@ import type { UserProfile } from '@/types'
 function ProfileContent(): React.JSX.Element {
   const { user, logout } = useAuth()
   const { summary } = useFootprint(user?.uid || null)
-  const [profile, setProfile] = useState<UserProfile | null>(null)
-
-  useEffect(() => {
-    if (user) {
-      getUserProfile(user.uid)
-        .then(setProfile)
-        .catch((error) => {
-          console.error('Failed to load user profile in profile page:', error)
-        })
-    } else {
-      setProfile(null)
-    }
-  }, [user])
+  const { profile } = useProfile(user?.uid || null)
 
   const handleLogout = useCallback(async (): Promise<void> => {
     await logout()

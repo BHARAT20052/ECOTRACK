@@ -21,9 +21,9 @@ app.use(helmet({
 
 const allowedOrigins = [
   'http://localhost:5173',
-  'https://carbon-footprint-platfor-5f521.web.app',
-  'https://carbon-footprint-platfor-5f521.firebaseapp.com',
-]
+  process.env['ALLOWED_ORIGIN_PROD'] ?? 'https://carbon-footprint-platfor-5f521.web.app',
+  process.env['ALLOWED_ORIGIN_ALT'] ?? 'https://carbon-footprint-platfor-5f521.firebaseapp.com',
+].filter(Boolean)
 
 app.use(cors({
   origin: (origin, callback) => {

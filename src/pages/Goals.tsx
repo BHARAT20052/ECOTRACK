@@ -1,17 +1,17 @@
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useCallback } from 'react'
 import { toast } from 'react-hot-toast'
 import { Trophy } from 'lucide-react'
 
 import { useAuth } from '@/hooks/useAuth'
 import { useFootprint } from '@/hooks/useFootprint'
 import { useGoals } from '@/hooks/useGoals'
+import { useProfile } from '@/hooks/useProfile'
 import { Card } from '@/components/ui/Card'
 import { ErrorBoundary } from '@/components/ui/ErrorBoundary'
 import { GoalProgressCard } from '@/components/goals/GoalProgressCard'
 import { QuickOffsetsGrid } from '@/components/goals/QuickOffsetsGrid'
 import { BadgesGrid } from '@/components/goals/BadgesGrid'
-import { getUserProfile } from '@/services/firestore'
-import type { UserProfile, ActionDetails } from '@/types'
+import type { ActionDetails } from '@/types'
 
 /**
  * Renders the Goals page content containing streaking dashboard, monthly goals, and achievement badges.
@@ -20,26 +20,10 @@ function GoalsContent(): React.JSX.Element {
   const { user } = useAuth()
   const { summary, logActivity } = useFootprint(user?.uid || null)
   const { goal, updateGoal, loading: goalLoading } = useGoals(user?.uid || null)
+  const { profile, loading: profileLoading } = useProfile(user?.uid || null)
 
-  const [earnedBadges, setEarnedBadges] = useState<string[]>([])
-  const [badgesLoading, setBadgesLoading] = useState<boolean>(true)
-  const [profile, setProfile] = useState<UserProfile | null>(null)
-
-  useEffect(() => {
-    if (user) {
-      getUserProfile(user.uid)
-        .then((p: UserProfile | null) => {
-          setProfile(p)
-          setEarnedBadges(p?.badges || [])
-        })
-        .catch((err) => {
-          console.error('Failed to load user profile in goals page:', err)
-        })
-        .finally(() => {
-          setBadgesLoading(false)
-        })
-    }
-  }, [user])
+  const earnedBadges = profile?.badges || []
+  const badgesLoading = profileLoading
 
   const handleEcoAction = useCallback(
     async (actionId: ActionDetails['actionId'], name: string): Promise<void> => {

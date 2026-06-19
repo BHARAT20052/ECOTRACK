@@ -1,14 +1,13 @@
-import React, { useState, useEffect } from 'react'
+import React from 'react'
 
 import { useAuth } from '@/hooks/useAuth'
 import { useFootprint } from '@/hooks/useFootprint'
+import { useProfile } from '@/hooks/useProfile'
 import { Card } from '@/components/ui/Card'
 import { ErrorBoundary } from '@/components/ui/ErrorBoundary'
 import { DashboardStats } from '@/components/dashboard/DashboardStats'
 import { WeeklyTrendChart } from '@/components/dashboard/WeeklyTrendChart'
 import { CategoryDistributionChart } from '@/components/dashboard/CategoryDistributionChart'
-import { getUserProfile } from '@/services/firestore'
-import type { UserProfile } from '@/types'
 
 const SKELETON_ITEMS_COUNT = 4 as const
 
@@ -18,19 +17,7 @@ const SKELETON_ITEMS_COUNT = 4 as const
 function DashboardContent(): React.JSX.Element {
   const { user } = useAuth()
   const { summary, loading } = useFootprint(user?.uid || null)
-  const [profile, setProfile] = useState<UserProfile | null>(null)
-
-  useEffect(() => {
-    if (user) {
-      getUserProfile(user.uid)
-        .then(setProfile)
-        .catch((error) => {
-          console.error('Failed to load user profile in dashboard:', error)
-        })
-    } else {
-      setProfile(null)
-    }
-  }, [user])
+  const { profile } = useProfile(user?.uid || null)
 
   if (loading) {
     return (
